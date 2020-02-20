@@ -42,5 +42,10 @@ end
 
 post('/register') do
     db = connect_to_db('db/Blocket.db')
+    username = params["username"]
+    password = params["username"]
+    password_digest = BCrypt::Password.create(plain_text_password)
+
+
     redirect('/login')
 end
