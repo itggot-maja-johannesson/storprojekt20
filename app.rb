@@ -46,6 +46,23 @@ post('/register') do
     password = params["username"]
     password_digest = BCrypt::Password.create(plain_text_password)
 
+    password_confirmation = params["confirm password"]
 
-    redirect('/login')
+    result = db.execute("SELECT ID FROM users WHERE Name=?", username)
+
+    if result.empty? 
+        if password == password_confirmation
+            password_digest = BCrypt::password.create
+            (password)
+            p password_digest
+            db.execute("INSERT INTO users(Name, password_digest) VALUES (?,?)", [username, password_digest])
+            redirect('/create') #kanske
+        else
+            set_error("Password don't match")
+            redirect('/error')
+        end
+    else
+        set_error("Username already exists")
+        redirect('/error')
+    end
 end
