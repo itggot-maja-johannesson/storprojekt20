@@ -1,29 +1,78 @@
 body {
     background: lightyellow;
-    height: 200px;
     padding: none;
     display: flex;
     margin: none;
     flex-direction: column;
-    
 }
 
 header {
-    height: 100px;
+    height: auto;
     background: white;
     padding: none;
     margin: none;
 }
 
 a {
-    font-style: bold;
+    text-decoration: none;
+    text-align: center;
 }
 
 nav {
-    background: lightgreen;
-    width: 450px;
+    background: brown;
     height: 70px;
-    padding: 20px;
-    border-radius: 20px 20px;
+    display: flex;
+    flex-direction: row;
+}
+
+
+div#account{
+    background: cadetblue;
+    width: 25%;
+    height: auto;
+}
+
+div#search{
+    background: khaki;
+    width: 25%;
+    height: auto;
+}
+
+div#posts{
+    background: plum;
+    width: 25%;
+    height: auto;
+}
+
+div#favorites{
+    background: goldenrod;
+    width: 25%;
+    height: auto;
+}
+
+div {
+    background: pink;
+    width: 200px;
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+}
+
+div#box1 {
+    background: blue;
+    width: auto;
+    height: 50%;
+    display: flex;
+    border-radius: 15px;
+    justify-content: center;
+}
+
+div#box2 {
+    background: lightseagreen;
+    width: auto;
+    height: 50%;
+    display: flex;
+    border-radius: 15px;
+    justify-content: center;
 }
 

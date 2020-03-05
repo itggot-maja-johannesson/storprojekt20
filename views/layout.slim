@@ -9,8 +9,18 @@ html lang="en"
 
     body
 
-        header
-            h1 Välkommen till Majas köp och sälj
         nav 
-            ==yield
+            div id="account"
+                a href="/" Your account
+            div id="search"
+                a href="/" Search for...
+            div id="posts"
+                a href="/" Posts
+            div id="favorites"
+                a href="/" Your favorites
+
+        header
+            h1 Welcome to Maja's blocket 
+        
+        ==yield
         
