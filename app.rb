@@ -44,19 +44,17 @@ post('/register') do
     db = connect_to_db('db/Blocket.db')
     username = params["username"]
     password = params["username"]
-    password_digest = BCrypt::Password.create(plain_text_password)
 
     password_confirmation = params["confirm password"]
 
-    result = db.execute("SELECT ID FROM users WHERE Name=?", username)
+    result = db.execute("SELECT ID FROM User WHERE Username=?", username)
 
     if result.empty? 
         if password == password_confirmation
-            password_digest = BCrypt::password.create
-            (password)
+            password_digest = BCrypt::Password.create(password)
             p password_digest
-            db.execute("INSERT INTO users(Name, password_digest) VALUES (?,?)", [username, password_digest])
-            redirect('/create') #kanske
+            db.execute("INSERT INTO User(Username, Password) VALUES (?,?)", [username, password_digest])
+            redirect('/login')
         else
             set_error("Password don't match")
             redirect('/error')
