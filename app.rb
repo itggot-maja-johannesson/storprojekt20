@@ -27,13 +27,30 @@ get('/login') do
     slim(:'users/index')
 end
 
+get('/postlayout') do
+    slim(:'Posts/index')
+end
+
 post('/login') do
     db = connect_to_db('db/Blocket.db')
     username = params["username"]
     password = params["password"]
 
+    result = db.execute("SELECT ID FROM User WHERE Username=?", username)
+
+    if result.empty?
+        set_error("Invalid Credentials")
+        redirect("/error")
+    end
+
+    user_id = result.first["ID"]
+    password_digest = result.first["password_digest"]
+
+    if BCrypt::Password.new(password_digest) == password
+
+    end
     # db.execute("INSERT INTO users(username, password) VALUES (?,?)", [username, password])
-    redirect('/login')
+    redirect('/postlayout')
 end
 
 get('/register') do
@@ -54,7 +71,7 @@ post('/register') do
             password_digest = BCrypt::Password.create(password)
             p password_digest
             db.execute("INSERT INTO User(Username, Password) VALUES (?,?)", [username, password_digest])
-            redirect('/login')
+            redirect('/postlayout')
         else
             set_error("Password don't match")
             redirect('/error')
@@ -64,3 +81,4 @@ post('/register') do
         redirect('/error')
     end
 end
+
