@@ -27,30 +27,31 @@ get('/login') do
     slim(:'users/index')
 end
 
-get('/postlayout') do
-    slim(:'Posts/index')
-end
-
 post('/login') do
     db = connect_to_db('db/Blocket.db')
+    db.results_as_hash = true
     username = params["username"]
     password = params["password"]
 
-    result = db.execute("SELECT ID FROM User WHERE Username=?", username)
+    result = db.execute("SELECT id FROM users WHERE username=?", username)
 
     if result.empty?
-        set_error("Invalid Credentials")
-        redirect("/error")
+        sessions[:user_error] = "Invalid Credentials!"
+        redirect("/register")
     end
 
-    user_id = result.first["ID"]
+    user_id = result.first["id"]
     password_digest = result.first["password_digest"]
 
     if BCrypt::Password.new(password_digest) == password
-
+        session[:user_id] = user_id
+        redirect('/postlayout')
+    else
+        sessions[:user_error] = "Invalid Credentials!"
+        redirect("/register")
     end
     # db.execute("INSERT INTO users(username, password) VALUES (?,?)", [username, password])
-    redirect('/postlayout')
+    # redirect('/postlayout')
 end
 
 get('/register') do
@@ -59,26 +60,40 @@ end
 
 post('/register') do
     db = connect_to_db('db/Blocket.db')
+    db.results_as_hash = true
     username = params["username"]
-    password = params["username"]
+    password = params["password"]
+    password_confirmation = params["confirm_password"]
 
-    password_confirmation = params["confirm password"]
-
-    result = db.execute("SELECT ID FROM User WHERE Username=?", username)
+    result = db.execute("SELECT id FROM users WHERE username=?", username)
 
     if result.empty? 
         if password == password_confirmation
             password_digest = BCrypt::Password.create(password)
-            p password_digest
-            db.execute("INSERT INTO User(Username, Password) VALUES (?,?)", [username, password_digest])
+            db.execute("INSERT INTO users(username, password) VALUES (?,?)", [username, password_digest])
             redirect('/postlayout')
         else
-            set_error("Password don't match")
-            redirect('/error')
+            session[:user_error] = "Passwords don't match!"
+            redirect('/register')
         end
     else
-        set_error("Username already exists")
-        redirect('/error')
+        session[:user_error] = "Sorry, username already taken!"
+        redirect('/register')
     end
 end
+
+get('/postlayout') do
+    slim(:'Posts/index')
+    slim(:'Posts/new')
+end
+
+get('/postlayout') do
+    
+end
+
+
+post('/postlayout') do 
+    redirect('/postlayout')
+end
+
 
