@@ -1,6 +1,26 @@
-/ <form action = "/createpost" method = "post">
-/     <input type="text" name="Title" placeholder="title">
-/     <input type="text" name="Categories" placeholder="categories">
-/     <input type="integer" name="Price" placeholder="price">
-/     <input type="text" name="Specification" placeholder="specification">
-/     <input type="submit" value="Create account">
+<form action = "/postlayout" method = "post">
+    <input type="text" name="title" placeholder="title">
+    select name="Categories1" 
+        option value="clothes"clothes
+        option value="furniture"furniture
+        option value="shoes"shoes
+        option value="outdoor"outdoor
+        option value="games"games
+    select name="Categories2" placeholder="categories"
+        option value="clothes"clothes
+        option value="furniture"furniture
+        option value="shoes"shoes
+        option value="outdoor"outdoor
+        option value="games"games
+    <input type="integer" name="price" placeholder="price">
+    <input type="text" name="specification" placeholder="specification">
+    <input type="submit" value="Create post">
+
+    label for="cars">Choose a car:
+
+    select id="cars" multiple
+    <option value="volvo">Volvo</option>
+    <option value="saab">Saab</option>
+    <option value="opel">Opel</option>
+    <option value="audi">Audi</option>
+    </select>
