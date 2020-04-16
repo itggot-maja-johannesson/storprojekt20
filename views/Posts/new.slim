@@ -1,26 +1,26 @@
-<form action = "/postlayout" method = "post">
-    <input type="text" name="title" placeholder="title">
-    select name="Categories1" 
-        option value="clothes"clothes
-        option value="furniture"furniture
-        option value="shoes"shoes
-        option value="outdoor"outdoor
-        option value="games"games
-    select name="Categories2" placeholder="categories"
-        option value="clothes"clothes
-        option value="furniture"furniture
-        option value="shoes"shoes
-        option value="outdoor"outdoor
-        option value="games"games
-    <input type="integer" name="price" placeholder="price">
-    <input type="text" name="specification" placeholder="specification">
-    <input type="submit" value="Create post">
+h2 Create a new post
 
-    label for="cars">Choose a car:
+div id="new_post"
+    form action = "/postlayout" method = "post" enctype="multipart/form-data"
+        input type="text" name="title" placeholder="title"
 
-    select id="cars" multiple
-    <option value="volvo">Volvo</option>
-    <option value="saab">Saab</option>
-    <option value="opel">Opel</option>
-    <option value="audi">Audi</option>
-    </select>
+        input type="checkbox" name="clothes" id="clothes"
+            lable for="clothes" clothes 
+
+        input type="checkbox" name="furniture" id="furniture"
+            lable for="furniture" furniture 
+
+        input type="checkbox" name="shoes" id="shoes"
+            lable for="shoes" shoes
+
+        input type="checkbox" name="outdoor" id="outdoor"
+            lable for="outdoor" outdoor
+
+        input type="checkbox" name="games" id="games"
+            lable for="games" games
+
+        input type="file" name="file" id="file" accept="image/png, image/jpeg, image/jpg"
+        
+        input type="number" name="price" placeholder="price"
+        textarea cols="30" rows="10" name="specification" placeholder="specification"
+        input type="submit" value="Create post"

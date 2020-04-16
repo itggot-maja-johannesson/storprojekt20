@@ -4,6 +4,7 @@ body {
     display: flex;
     margin: none;
     flex-direction: column;
+    height: auto;
 }
 
 header {
@@ -87,4 +88,11 @@ div#box2 {
     border: 1px solid #ddd; /* Add a grey border */
     margin-bottom: 12px; /* Add some space below the input */
   }
+
+div#new_post {
+    width: 35%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+}
 

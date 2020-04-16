@@ -1,8 +1,12 @@
 
 div 
-     div id="box1"
-          a href="/login" Login
+     - unless session[:user_id]
+          div id="box1"
+               a href="/login" Login
 
+     - if session[:user_id]
+          div id="box1"
+               a href="/logout" Logout
 
      div id="box2"
           a href="/register" Create account
