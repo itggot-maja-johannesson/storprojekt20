@@ -18,6 +18,9 @@ end
 #     redirect('/photos')
 # end
    
+# before('/') do 
+#     session[:user_id] = 1
+# end
 
 get('/') do 
     slim(:index)
@@ -33,7 +36,7 @@ post('/login') do
     username = params["username"]
     password = params["password"]
 
-    result = db.execute("SELECT id FROM users WHERE username=?", username)
+    p result = db.execute("SELECT * FROM users WHERE username=?", username)
 
     if result.empty?
         sessions[:user_error] = "Invalid Credentials!"
@@ -41,13 +44,15 @@ post('/login') do
     end
 
     user_id = result.first["id"]
-    password_digest = result.first["password_digest"]
+    p password_digest = result.first["password"]
+    # p BCrypt::Password.new(password_digest)
+
 
     if BCrypt::Password.new(password_digest) == password
         session[:user_id] = user_id
         redirect('/postlayout')
     else
-        sessions[:user_error] = "Invalid Credentials!"
+        session[:user_error] = "Invalid Credentials!"
         redirect("/register")
     end
     # db.execute("INSERT INTO users(username, password) VALUES (?,?)", [username, password])
@@ -82,18 +87,41 @@ post('/register') do
     end
 end
 
+# before('/postlayout') do 
+#     session[:user_id] = 1
+# end
+
+
 get('/postlayout') do
     slim(:'Posts/index')
     slim(:'Posts/new')
 end
 
 get('/postlayout') do
-    
+    slim(:'Posts/show')
 end
 
 
 post('/postlayout') do 
+    db = connect_to_db('db/Blocket.db')
+    db.results_as_hash = true
+
+    p "-----------------------------"
+
+    p user_id = session[:user_id]
+    p title = params[:title]
+    p text = params[:specification]
+    p price = params[:price]
+
+    p "-----------------------------"
+
+    p path = File.join("./public/uploaded_pictures/", params[:file][:filename])
+    File.write(path, File.read(params[:file][:tempfile]))
+
+    db.execute("INSERT INTO posts(user_id, title, text, picture_source, price) VALUES (?,?,?,?,?)", [user_id, title, text, path, price])
+
     redirect('/postlayout')
 end
+
 
 
