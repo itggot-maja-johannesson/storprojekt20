@@ -1,0 +1,7 @@
+div id="comment"
+    form action = "/postlayout" method = "post" enctype="multipart/form-data"
+        textarea cols="30" rows="5" name="text" placeholder="text"
+        input type="submit" value="Comment"
+
+
+h3 #{session[:comment_error]}

@@ -4,23 +4,25 @@ div id="new_post"
     form action = "/postlayout" method = "post" enctype="multipart/form-data"
         input type="text" name="title" placeholder="title"
 
-        input type="checkbox" name="clothes" id="clothes"
-            lable for="clothes" clothes 
+        input type="checkbox" name="cat_1" id="cat_1"
+            lable for="cat_1" clothes 
 
-        input type="checkbox" name="furniture" id="furniture"
-            lable for="furniture" furniture 
+        input type="checkbox" name="cat_2" id="cat_2"
+            lable for="cat_2" furniture 
 
-        input type="checkbox" name="shoes" id="shoes"
-            lable for="shoes" shoes
+        input type="checkbox" name="cat_3" id="cat_3"
+            lable for="cat_3" shoes
 
-        input type="checkbox" name="outdoor" id="outdoor"
-            lable for="outdoor" outdoor
+        input type="checkbox" name="cat_4" id="cat_4"
+            lable for="cat_4" outdoor
 
-        input type="checkbox" name="games" id="games"
-            lable for="games" games
+        input type="checkbox" name="cat_5" id="cat_5"
+            lable for="cat_5" games
 
         input type="file" name="file" id="file" accept="image/png, image/jpeg, image/jpg"
         
         input type="number" name="price" placeholder="price"
         textarea cols="30" rows="10" name="specification" placeholder="specification"
         input type="submit" value="Create post"
+
+h3 #{session[:post_error]}
