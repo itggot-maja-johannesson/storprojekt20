@@ -11,7 +11,7 @@ def connect_to_db(path)
 end
 
 get('/') do 
-    slim(:index)
+    slim(:'index')
 end
 
 get('/register') do
@@ -82,6 +82,12 @@ end
 
 
 get('/postlayout') do
+    db = connect_to_db('db/Blocket.db')
+    db.results_as_hash = true
+
+    posts = db.execute("SELECT * FROM posts")    
+    session[:posts] = posts.each { |post| post["username"]=db.execute("SELECT username FROM users WHERE id=?", [post["user_id"]])[0]["username"] }
+
     slim(:'Posts/index')
     slim(:'Posts/new')
 end
@@ -135,6 +141,76 @@ post('/postlayout') do
     redirect('/postlayout')
 end
 
+post('/delete_post/:id') do
+    db = connect_to_db('db/Blocket.db')
+    db.results_as_hash = true
+    db.execute("DELETE FROM posts WHERE id=?", [params["id"]])
+    
+    redirect('/postlayout')
+end
+
+before('/edit_post/:id') do 
+    session[:user_id] = 1
+end
+
+get('/edit_post/:id') do
+    db = connect_to_db('db/Blocket.db')
+    db.results_as_hash = true
+    session[:post] = db.execute("SELECT * FROM posts WHERE id=?",[params["id"]])[0]
+
+    p session[:post]["user_id"]
+    p session[:user_id]
+
+    if session[:post]["user_id"] == session[:user_id]
+        slim(:'Posts/edit')
+    else
+        redirect('/postlayout')
+    end
+end
+
+post('/edit_post/:id') do
+    db = connect_to_db('db/Blocket.db')
+    db.results_as_hash = true
+
+    case false
+        when !!session[:user_id]
+            session[:post_error] = "You need to be logged in"
+
+        when !params[:title].empty?
+            session[:post_error] = "You need to have a title"
+
+        when !params[:specification].empty?
+            session[:post_error] = "You need to have a text"
+
+        when !params[:price].empty?
+            session[:post_error] = "You need to add a price"
+    end
+
+    unless session[:post_error]
+
+        path = session[:post]["picture_source"]
+
+        if !!params[:file]
+            path = File.join("./public/uploaded_pictures/", params[:file][:filename])
+            File.write(path, File.read(params[:file][:tempfile]))
+        end
+
+        db.execute("UPDATE posts SET
+            title = ?,
+            text = ?,
+            picture_source = ?,
+            price = ?
+            WHERE id=?",[params[:title], params[:specification], path, params[:price], params[:id]])
+
+    end
+
+    if session[:post_error]
+        redirect("/edit_post/#{params[:id]}")
+    else
+        redirect('/postlayout')
+    end
+end
+
 get('/showposts') do
     slim(:'Posts/show')
 end
@@ -154,51 +230,32 @@ end
 #     redirect('/postlayout')
 # end
 
-def get_post_from_id(id)
-    db = connect_to_db('db/Blocket.db')
-    
-    post = db.execute("SELECT (posts.title, posts.text, posts.price) FROM posts WHERE id=?", id)
-    return post
-end
-
 # ska kolla om personen har behörighet
 
-before do
-    session[:user_liked] = {}
-    session[:error] = ""
-    session[:user_id] = 1
-    if session[:user_id] == nil
-        case request.path_info
-        when '/'
-            break     
-        when '/sign_in'
-            break
-        when '/sign_in_user'
-            break
-        when '/create_user'
-            break
-        when '/sign_up'
-            break
-        when '/test'
-            break
-        else
-            session[:error] = "You need to be logged in order to do this"
-            redirect('/login')
-        end    
-    end
-end 
-
-get('/delete_post') do
-end
-
-post('/delete_post') do
-end
-
-get('/edit_post') do
-end
-
-post('/edit_post') do
-end
+# before do
+#     session[:user_liked] = {}
+#     session[:error] = ""
+#     session[:user_id] = 1
+#     if session[:user_id] == nil
+#         case request.path_info
+#         when '/'
+#             break     
+#         when '/sign_in'
+#             break
+#         when '/sign_in_user'
+#             break
+#         when '/create_user'
+#             break
+#         when '/sign_up'
+#             break
+#         when '/test'
+#             break
+#         else
+#             session[:error] = "You need to be logged in order to do this"
+#             redirect('/login')
+#         end    
+#     end
+# end 
 
 get('/youraccount') do
     slim(:'Users/show')

@@ -1,3 +1,7 @@
+* {
+    font-family: Arial;
+}
+
 body {
     background: lightyellow;
     padding: none;
@@ -44,6 +48,27 @@ div#posts{
     background: plum;
     width: 25%;
     height: auto;
+}
+
+div#posts-container {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: center;
+    justify-items: center;
+    width: auto;
+    height: auto;
+}
+
+div.post {
+    border: black 2px solid;
+    padding: 30px;
+    width: auto;
+    height: auto;
+}
+
+.post-btn {
+    width: 100px;
+    font: black;
 }
 
 div#account{

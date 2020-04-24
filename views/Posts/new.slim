@@ -26,3 +26,18 @@ div id="new_post"
         input type="submit" value="Create post"
 
 h3 #{session[:post_error]}
+
+div id="posts-container"
+    - for post in session[:posts]
+        div class="post"
+            h4 Title: #{post["title"]}
+            h4 Username: #{post["username"]}
+            h5 Price: #{post["price"].to_s} kr
+            h5 Text:
+            p #{post["text"]}
+            img src="#{post['picture_source']}" alt="picture"
+            - if post["user_id"] == session[:user_id]
+                button type="submit" value="Edit post" id="post-edit-btn" class="post-btn"
+                    a href="/edit_post/#{post['id']}" Edit post
+                form action="/delete_post/#{post['id']}" method="post"
+                    input type="submit" value="Delete post" id="post-delete-btn" class="post-btn"
