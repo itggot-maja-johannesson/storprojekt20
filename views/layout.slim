@@ -7,20 +7,20 @@ html lang="en"
         link href="/Blocket.css" rel="stylesheet"/
         title Blocket
 
+    
     body
-
         nav 
-            div id="home"
+            div class="navigation"
                 a href="/" Home
-            div id="search"
+            div class="navigation"
                 input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for..."
-            div id="posts"
+            div class="navigation"
                 a href="/postlayout" Posts
-            div id="account"
+            div class="navigation"
                 a href="/youraccount" Your account
 
-        header
-            h1 Maja's blocket 
-        
-        ==yield
-        
+        div class="body-container"
+            header
+                h1 Maja's blocket 
+            
+            ==yield

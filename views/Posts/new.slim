@@ -11,7 +11,7 @@ div id="new_post"
         input type="file" name="file" id="file" accept="image/png, image/jpeg, image/jpg"
         
         input type="number" name="price" placeholder="price"
-        textarea cols="30" rows="10" name="specification" placeholder="specification"
+        textarea cols="35" rows="4" name="specification" placeholder="specification"
         input type="submit" value="Create post"
 
 h3 #{session[:post_error]}
@@ -48,8 +48,3 @@ div id="posts-container"
                         - if comment["user_id"] == session[:user_id]
                             form action="/delete_comment/#{comment['id']}" method="post"
                                 input type="submit" value="Delete comment" class="post-btn"
-                        
-
-
-
-        
