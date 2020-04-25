@@ -1,28 +1,21 @@
 h1 Edit!!!!!
 
 div id="edit_post"
-    form action = "/edit_post/#{session[:post]['id']}" method = "post" enctype="multipart/form-data"
-        input type="text" name="title" value="#{session[:post]['title']}"
+    form action = "/edit_post/#{@post['id']}" method = "post" enctype="multipart/form-data"
+        input type="text" name="title" value="#{@post['title']}"
 
-        input type="checkbox" name="cat_1" id="cat_1"
-            lable for="cat_1" clothes 
-
-        input type="checkbox" name="cat_2" id="cat_2"
-            lable for="cat_2" furniture 
-
-        input type="checkbox" name="cat_3" id="cat_3"
-            lable for="cat_3" shoes
-
-        input type="checkbox" name="cat_4" id="cat_4"
-            lable for="cat_4" outdoor
-
-        input type="checkbox" name="cat_5" id="cat_5"
-            lable for="cat_5" games
+        - for cat in @categories
+            - if cat["checked"]
+                input type="checkbox" name="cat_#{cat['id']}" id="cat_#{cat['id']}" checked=""
+                    lable for="cat_#{cat['id']}" #{cat['name']}
+            - else
+                input type="checkbox" name="cat_#{cat['id']}" id="cat_#{cat['id']}"
+                    lable for="cat_#{cat['id']}" #{cat['name']}
 
         input type="file" name="file" id="file" accept="image/png, image/jpeg, image/jpg"
         
-        input type="number" name="price" value="#{session[:post]['price']}"
-        textarea cols="30" rows="10" name="specification" #{session[:post]["text"]}
+        input type="number" name="price" value="#{@post['price']}"
+        textarea cols="30" rows="10" name="specification" #{@post["text"]}
         input type="submit" value="Edit post"
 
 h2 #{session[:post_error]}
