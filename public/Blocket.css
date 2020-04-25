@@ -68,7 +68,27 @@ div.post {
 
 .post-btn {
     width: 100px;
-    font: black;
+    color: black;
+}
+
+#comment-container {
+    max-width: 30%;
+    height: auto;
+    border: solid black 2px;
+    padding: 20px;
+    margin: 10px 0 0 0;
+}
+
+#comment-container {
+    border: solid black 2px;
+    padding: 20px;
+    margin: 10px 0 0 0;
+}
+
+.comment {
+    border: solid black 2px;
+    padding: 20px;
+    margin: 10px 0 0 0;
 }
 
 div#account{
@@ -79,8 +99,8 @@ div#account{
 
 div {
     background: pink;
-    width: 200px;
-    height: 150px;
+    /* width: 200px;
+    height: 150px; */
     display: flex;
     flex-direction: column;
 }
