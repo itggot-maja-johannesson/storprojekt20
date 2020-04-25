@@ -4,10 +4,16 @@ require 'sqlite3'
 require 'bcrypt'
 enable :sessions
 
-def connect_to_db(path)
-    db = SQLite3::Database.new(path)
-    db.results_as_hash = true
-    return db
+before do
+    # Connect to database
+    @db = SQLite3::Database.new('db/Blocket.db')
+    @db.results_as_hash = true
+
+    session[:user_id] = 1
+
+    # if session[:user_id]
+    #     @user = db.execute("SELECT (id, username) WHERE id=?"[session[:user_id]]).first
+    # end
 end
 
 get('/') do 
@@ -19,18 +25,16 @@ get('/register') do
 end
 
 post('/register') do
-    db = connect_to_db('db/Blocket.db')
-    db.results_as_hash = true
     username = params["username"]
     password = params["password"]
     password_confirmation = params["confirm_password"]
 
-    result = db.execute("SELECT id FROM users WHERE username=?", username)
+    result = @db.execute("SELECT id FROM users WHERE username=?", username)
 
     if result.empty? 
         if password == password_confirmation
             password_digest = BCrypt::Password.create(password)
-            db.execute("INSERT INTO users(username, password) VALUES (?,?)", [username, password_digest])
+            @db.execute("INSERT INTO users(username, password) VALUES (?,?)", [username, password_digest])
             redirect('/postlayout')
         else
             session[:user_error] = "Passwords don't match!"
@@ -47,12 +51,10 @@ get('/login') do
 end
 
 post('/login') do
-    db = connect_to_db('db/Blocket.db')
-    db.results_as_hash = true
     username = params["username"]
     password = params["password"]
 
-    p result = db.execute("SELECT * FROM users WHERE username=?", username)
+    result = @db.execute("SELECT * FROM users WHERE username=?", username)
 
     if result.empty?
         sessions[:user_error] = "Invalid Credentials!"
@@ -71,33 +73,41 @@ post('/login') do
         session[:user_error] = "Invalid Credentials!"
         redirect("/register")
     end
-    # db.execute("INSERT INTO users(username, password) VALUES (?,?)", [username, password])
+    # @db.execute("INSERT INTO users(username, password) VALUES (?,?)", [username, password])
     # redirect('/postlayout')
 end
 
-
-before('/postlayout') do 
-    session[:user_id] = 1
-end
-
-
 get('/postlayout') do
-    db = connect_to_db('db/Blocket.db')
-    db.results_as_hash = true
+    posts = @db.execute("SELECT * FROM posts")
+    @categories = @db.execute("SELECT * FROM categories")
 
-    posts = db.execute("SELECT * FROM posts")    
-    session[:posts] = posts.each { |post| post["username"]=db.execute("SELECT username FROM users WHERE id=?", [post["user_id"]])[0]["username"] }
+    comments = @db.execute("SELECT * FROM comments").each do |comment|
+        comment = comment["username"] = @db.execute("SELECT username FROM users WHERE id=?", [comment["user_id"]]).first["username"] 
+    end
 
-    slim(:'Posts/index')
-    slim(:'Posts/new')
+    @posts = posts.each do |post|
+        post["username"] = @db.execute("SELECT username FROM users WHERE id=?", [post["user_id"]]).first["username"]
+        post["comments"] = comments.select { |comment| comment["post_id"] == post["id"] }
+
+        # p posts_cat_ids = @db.execute("SELECT categorie_id FROM posts_categories WHERE post_id=?",[post["id"]]).map{ |cat| cat.to_a }.flatten.select { |cat| cat.is_a? Integer }
+        
+        post["categories"] = @db.execute("SELECT categorie_id FROM posts_categories WHERE post_id=?",[post["id"]]).map { |cat| p @db.execute("SELECT name FROM categories WHERE id=?",[cat["categorie_id"]]).first["name"] }
+        
+        # post["categories"] = @categories.select { |categorie| posts_cat_ids.include?(categorie["id"]) == true }
+    end
+
+    p @posts.first
+
+    # posts_cat_ids = @db.execute("SELECT categorie_id FROM posts_categories WHERE post_id=?",[params["id"]]).map{ |cat| cat.to_a }.flatten.select { |cat| cat.is_a? Integer }
+    # @categories = @db.execute("SELECT * FROM categories").each { |categorie| categorie["checked"] = posts_cat_ids.include?(categorie["id"]) }
+
+
+    slim(:'posts/index')
+    slim(:'posts/new')
 end
 
-post('/postlayout') do 
-    db = connect_to_db('db/Blocket.db')
-    db.results_as_hash = true
+post('/postlayout') do
 
-    p "-------outside!--------"
-    
     case false
         when !!session[:user_id]
             session[:post_error] = "You need to be logged in"
@@ -116,61 +126,46 @@ post('/postlayout') do
     end
 
     unless session[:post_error]
-        p "---------inside!----------"
+        user_id = session[:user_id]
+        title = params[:title]
+        text = params[:specification]
+        price = params[:price]
 
-        p user_id = session[:user_id]
-        p title = params[:title]
-        p text = params[:specification]
-        p price = params[:price]
+        cat_ids = params.to_a.select { |param| param[0].include?("cat_") }
+        cat_ids = cat_ids.map { |cat_id| cat_id = cat_id[0].split("").select.with_index { |_, i| i > 3 }.join.to_i }
 
-        params.to_a
+        path = File.join("./public/uploaded_pictures/", params[:file][:filename])
+        File.write(path, File.read(params[:file][:tempfile]))    
 
-        p cat_ids = params.to_a.select { |param| param[0].include?("cat_") }
-        p cat_ids = cat_ids.map { |cat_id| cat_id = cat_id[0].split("").select.with_index { |_, i| i > 3 }.join.to_i }
-
-        p "---------inside!----------"
-
-        p path = File.join("./public/uploaded_pictures/", params[:file][:filename])
-        File.write(path, File.read(params[:file][:tempfile]))
-
-        db.execute("INSERT INTO posts(user_id, title, text, picture_source, price) VALUES (?,?,?,?,?)", [user_id, title, text, path, price])
-        p post_id = db.execute("SELECT id FROM posts WHERE user_id = ?", [user_id])[1]["id"]
-        cat_ids.each { |cat_id| db.execute("INSERT INTO posts_categories (post_id, categorie_id) VALUES (?,?)", [post_id, cat_id]) }
+        @db.execute("INSERT INTO posts(user_id, title, text, picture_source, price) VALUES (?,?,?,?,?)", [user_id, title, text, path, price])
+        post_id = @db.execute("SELECT id FROM posts").last["id"].to_i
+        cat_ids.each { |cat_id| @db.execute("INSERT INTO posts_categories (post_id, categorie_id) VALUES (?,?)", [post_id, cat_id]) }
     end
 
     redirect('/postlayout')
 end
 
 post('/delete_post/:id') do
-    db = connect_to_db('db/Blocket.db')
-    db.results_as_hash = true
-    db.execute("DELETE FROM posts WHERE id=?", [params["id"]])
-    
+    @db.execute("DELETE FROM posts WHERE id=?", [params["id"]])
     redirect('/postlayout')
 end
 
-before('/edit_post/:id') do 
-    session[:user_id] = 1
-end
-
 get('/edit_post/:id') do
-    db = connect_to_db('db/Blocket.db')
-    db.results_as_hash = true
-    session[:post] = db.execute("SELECT * FROM posts WHERE id=?",[params["id"]])[0]
 
-    p session[:post]["user_id"]
-    p session[:user_id]
+    @post = @db.execute("SELECT * FROM posts WHERE id=?",[params["id"]])[0]
+    @post["categories"] = @db.execute("SELECT * FROM posts_categories WHERE post_id=?",[params["id"]])
+    
+    posts_cat_ids = @db.execute("SELECT categorie_id FROM posts_categories WHERE post_id=?",[params["id"]]).map{ |cat| cat.to_a }.flatten.select { |cat| cat.is_a? Integer }
+    @categories = @db.execute("SELECT * FROM categories").each { |categorie| categorie["checked"] = posts_cat_ids.include?(categorie["id"]) }
 
-    if session[:post]["user_id"] == session[:user_id]
-        slim(:'Posts/edit')
+    if @post["user_id"] == session[:user_id]
+        slim(:'posts/edit')
     else
         redirect('/postlayout')
     end
 end
 
 post('/edit_post/:id') do
-    db = connect_to_db('db/Blocket.db')
-    db.results_as_hash = true
 
     case false
         when !!session[:user_id]
@@ -188,14 +183,16 @@ post('/edit_post/:id') do
 
     unless session[:post_error]
 
-        path = session[:post]["picture_source"]
-
-        if !!params[:file]
+        path = ""
+        
+        if !params[:file]
+            @db.execute("SELECT picture_source FROM posts WHERE id=?", [params["id"]])
+        else
             path = File.join("./public/uploaded_pictures/", params[:file][:filename])
             File.write(path, File.read(params[:file][:tempfile]))
         end
 
-        db.execute("UPDATE posts SET
+        @db.execute("UPDATE posts SET
             title = ?,
             text = ?,
             picture_source = ?,
@@ -211,100 +208,27 @@ post('/edit_post/:id') do
     end
 end
 
-get('/showposts') do
-    slim(:'Posts/show')
-end
-
-# post('/showposts') do
-#     db = connect_to_db('db/Blocket.db')
-#     db.results_as_hash = true
-
-#     user_id = session[:user_id]
-#     title = params[:title]
-#     text = params[:specification]
-#     price = params[:price]
-
-#     post = db.execute("SELECT (title, text, price) FROM posts WHERE id=?", id)
-#     return post
-
-#     redirect('/postlayout')
-# end
-
-# ska kolla om personen har behörighet
-
-# before do
-#     session[:user_liked] = {}
-#     session[:error] = ""
-#     session[:user_id] = 1
-#     if session[:user_id] == nil
-#         case request.path_info
-#         when '/'
-#             break     
-#         when '/sign_in'
-#             break
-#         when '/sign_in_user'
-#             break
-#         when '/create_user'
-#             break
-#         when '/sign_up'
-#             break
-#         when '/test'
-#             break
-#         else
-#             session[:error] = "You need to be logged in order to do this"
-#             redirect('/login')
-#         end    
-#     end
-# end 
-
 get('/youraccount') do
-    slim(:'Users/show')
+    slim(:'users/show')
 end
 
 post('/youraccount') do
-    db = connect_to_db('db/Blocket.db')
     username = params["username"]
-
     redirect('/youraccount')
 end
 
-get('/add_comment') do
-    slim(:'Comments/new')
-end
-
-post('/add_comment') do
-    db = connect_to_db('db/Blocket.db')
-    db.results_as_hash = true
+post('/add_comment/:id') do
+    comment = params["comment"]
+    post_id = params["id"]
     
-    case false
-        when !!session[:user_id]
-            session[:comment_error] = "You need to be logged in"
-
-        when !params[:text].empty?
-            session[:comment_error] = "You need to write a comment"
-    end
-
-    unless session[:comment_error]
-
-        p user_id = session[:user_id]
-        p text = params[:text]
-
-        params.to_a
-
-        File.write(path, File.read(params[:file][:tempfile]))
-
-        db.execute("INSERT INTO comments(user_id, text) VALUES (?,?)", [user_id, text])
-        p comment_id = db.execute("SELECT id FROM comments WHERE user_id = ?", [user_id])[1]["id"]
-        # något med post_id för att få till 'posts_comments'
-    end
-
+    @db.execute("INSERT INTO comments (user_id, text, post_id) VALUES (?,?,?)", [session[:user_id], comment, post_id])
+    
     redirect('/postlayout')
 end
 
-get('/delete_comment') do 
-end
-
-post('/delete_comment') do 
+post('/delete_comment/:id') do
+    @db.execute("DELETE FROM comments WHERE id=?", [params["id"]])
+    redirect('/postlayout')
 end
 
 

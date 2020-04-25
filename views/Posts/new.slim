@@ -4,20 +4,9 @@ div id="new_post"
     form action = "/postlayout" method = "post" enctype="multipart/form-data"
         input type="text" name="title" placeholder="title"
 
-        input type="checkbox" name="cat_1" id="cat_1"
-            lable for="cat_1" clothes 
-
-        input type="checkbox" name="cat_2" id="cat_2"
-            lable for="cat_2" furniture 
-
-        input type="checkbox" name="cat_3" id="cat_3"
-            lable for="cat_3" shoes
-
-        input type="checkbox" name="cat_4" id="cat_4"
-            lable for="cat_4" outdoor
-
-        input type="checkbox" name="cat_5" id="cat_5"
-            lable for="cat_5" games
+        - for cat in @categories
+            input type="checkbox" name="cat_#{cat['id']}" id="cat_#{cat['id']}"
+                lable for="cat_#{cat['id']}" #{cat['name']}
 
         input type="file" name="file" id="file" accept="image/png, image/jpeg, image/jpg"
         
@@ -28,11 +17,16 @@ div id="new_post"
 h3 #{session[:post_error]}
 
 div id="posts-container"
-    - for post in session[:posts]
+    - for post in @posts
         div class="post"
             h4 Title: #{post["title"]}
             h4 Username: #{post["username"]}
             h5 Price: #{post["price"].to_s} kr
+            h5 Categories:
+            ul
+                - for name in post["categories"]
+                    li #{name}
+
             h5 Text:
             p #{post["text"]}
             img src="#{post['picture_source']}" alt="picture"
@@ -41,3 +35,21 @@ div id="posts-container"
                     a href="/edit_post/#{post['id']}" Edit post
                 form action="/delete_post/#{post['id']}" method="post"
                     input type="submit" value="Delete post" id="post-delete-btn" class="post-btn"
+            - if session[:user_id]
+                div id="comment-container"
+                    form action = "/add_comment/#{post['id']}" method = "post"
+                        textarea cols="30" rows="10" name="comment" placeholder="comment here"
+                        input type="submit" value="Post comment" id="post-comment-btn" class="post-btn"
+            div id="comments-container"
+                - for comment in post["comments"]
+                    div class="comment"
+                        h4 User: #{comment["username"]}
+                        p #{comment["text"]}
+                        - if comment["user_id"] == session[:user_id]
+                            form action="/delete_comment/#{comment['id']}" method="post"
+                                input type="submit" value="Delete comment" class="post-btn"
+                        
+
+
+
+        
