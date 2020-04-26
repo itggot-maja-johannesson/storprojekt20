@@ -13,11 +13,11 @@ html lang="en"
             div class="navigation"
                 a href="/" Home
             div class="navigation"
+                a href="/posts" Posts
+            div class="navigation"
                 input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for..."
             div class="navigation"
-                a href="/postlayout" Posts
-            div class="navigation"
-                a href="/youraccount" Your account
+                a href="/users/#{session[:user_id]}" Your account
 
         div class="body-container"
             header

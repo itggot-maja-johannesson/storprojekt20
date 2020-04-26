@@ -1,12 +1,12 @@
-
 div class="start" 
      - unless session[:user_id]
-          div id="box1"
+          div class="btn"
                a href="/login" Login
 
      - if session[:user_id]
-          div id="box1"
-               a href="/logout" Logout
+          div class="btn"
+               form action = "/logout" method = "post"
+                    input type="submit" value="Logout"
 
-     div id="box2"
+     div class="btn"
           a href="/register" Create account

@@ -6,15 +6,7 @@ require_relative './model.rb'
 enable :sessions
 
 before do
-    # Connect to database
-    @db = SQLite3::Database.new('db/Blocket.db')
-    @db.results_as_hash = true
-
-    session[:user_id] = 1
-
-    # if session[:user_id]
-    #     @user = db.execute("SELECT (id, username) WHERE id=?"[session[:user_id]]).first
-    # end
+    @db = connec_to_database('db/Blocket.db')
 end
 
 get('/') do 
@@ -29,8 +21,17 @@ post('/register') do
     username = params["username"]
     password = params["password"]
     password_confirmation = params["confirm_password"]
+    results = register_account(username, password, password_confirmation)
+    p results
+    if results == true
+        session[:user_error] = ""
+        session[:user_id] = login_account(username, password) 
+        redirect('/posts')
+    else
+        session[:user_error] = results
+        redirect('/register')
+    end
 
-    register_account(username, password, password_confirmation)
 end
 
 get('/login') do
@@ -41,51 +42,78 @@ post('/login') do
     username = params["username"]
     password = params["password"]
 
-    login_account(username, password)
+    results = login_account(username, password)
+    if results.is_a? Integer
+        session[:user_id] = results
+        redirect('/posts')
+    else
+        session[:user_error] = results
+        redirect("/login")
+    end
 end
 
-get('/postlayout') do
+post('/logout') do 
+    session.destroy
+    redirect('/')
+end
+
+get('/posts') do
     view_posts()
     slim(:'posts/index')
     slim(:'posts/new')
 end
 
-post('/postlayout') do
-    upload_post()
-    redirect('/postlayout')
+post('/posts') do
+    results = upload_post(params, session[:user_id])
+    p results
+    if results == true
+        session[:post_error] = ""
+    else
+        p results
+        session[:post_error] = results
+    end
+    redirect('/posts')
 end
 
-post('/delete_post/:id') do
-    delete_post()
-    redirect('/postlayout')
+post('/posts/delete/:id') do
+    delete_post(params["id"])
+    redirect('/posts')
 end
 
-get('/edit_post/:id') do
-    show_edit_post()
+get('/posts/edit/:id') do
+    results = show_edit_post(session[:user_id]) 
+    if results == true
+        slim(:'posts/edit')
+    else
+        redirect('/posts')
+    end
 end
 
-post('/edit_post/:id') do
-    edit_post()
+post('/posts/edit/:id') do
+    results = ""
+    results = edit_post(params, session[:user_id]) if session[:user_id]
+    if results == true
+        session[:post_error] = ""
+        redirect('/posts')
+    else
+        session[:post_error] = results
+        redirect("/posts/edit/#{params[:id]}")
+    end
 end
 
-get('/youraccount') do
+get("/users/:id") do
     slim(:'users/show')
 end
 
-post('/youraccount') do
-    username = params["username"]
-    redirect('/youraccount')
-end
-
-post('/add_comment/:id') do
+post('/comments/add/:id') do 
     comment = params["comment"]
     post_id = params["id"]
     
-    post_comment(comment, post_id)
-    redirect('/postlayout')
+    post_comment(comment, post_id, session[:user_id]) if session[:user_id]
+    redirect('/posts')
 end
 
-post('/delete_comment/:id') do
-    delete_comment()
-    redirect('/postlayout')
+post('/comments/delete/:id') do
+    delete_comment(params["id"])
+    redirect('/posts')
 end
