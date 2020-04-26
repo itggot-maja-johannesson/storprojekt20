@@ -59,7 +59,6 @@ end
 
 get('/posts') do
     view_posts()
-    slim(:'posts/index')
     slim(:'posts/new')
 end
 
