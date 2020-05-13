@@ -31,12 +31,12 @@ div id="posts-container"
             img src="#{post['picture_source']}" alt="picture"
             - if post["user_id"] == session[:user_id]
                 button type="submit" value="Edit post" id="post-edit-btn" class="post-btn"
-                    a href="/posts/edit/#{post['id']}" Edit post
-                form action="/posts/delete/#{post['id']}" method="post"
+                    a href="/posts/#{post['id']}/edit" Edit post
+                form action="/posts/#{post['id']}/delete" method="post"
                     input type="submit" value="Delete post" id="post-delete-btn" class="post-btn"
             - if session[:user_id]
                 div id="comment-container"
-                    form action = "/comments/add/#{post['id']}" method = "post"
+                    form action = "/comments/#{post['id']}/add" method = "post"
                         textarea cols="30" rows="10" name="comment" placeholder="comment here"
                         input type="submit" value="Post comment" id="post-comment-btn" class="post-btn"
             div id="comments-container"
@@ -45,5 +45,5 @@ div id="posts-container"
                         h4 User: #{comment["username"]}
                         p #{comment["text"]}
                         - if comment["user_id"] == session[:user_id]
-                            form action="/comments/delete/#{comment['id']}" method="post"
+                            form action="/comments/#{comment['id']}/delete" method="post"
                                 input type="submit" value="Delete comment" class="post-btn"

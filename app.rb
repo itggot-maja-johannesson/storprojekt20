@@ -74,12 +74,12 @@ post('/posts') do
     redirect('/posts')
 end
 
-post('/posts/delete/:id') do
+post('/posts/:id/delete') do
     delete_post(params["id"])
     redirect('/posts')
 end
 
-get('/posts/edit/:id') do
+get('/posts/:id/edit') do
     results = show_edit_post(session[:user_id]) 
     if results == true
         slim(:'posts/edit')
@@ -88,7 +88,7 @@ get('/posts/edit/:id') do
     end
 end
 
-post('/posts/edit/:id') do
+post('/posts/:id/edit') do
     results = ""
     results = edit_post(params, session[:user_id]) if session[:user_id]
     if results == true
@@ -96,7 +96,7 @@ post('/posts/edit/:id') do
         redirect('/posts')
     else
         session[:post_error] = results
-        redirect("/posts/edit/#{params[:id]}")
+        redirect("/posts/#{params[:id]}/edit")
     end
 end
 
@@ -104,7 +104,7 @@ get("/users/:id") do
     slim(:'users/show')
 end
 
-post('/comments/add/:id') do 
+post('/comments/:id/add') do 
     comment = params["comment"]
     post_id = params["id"]
     
@@ -112,7 +112,7 @@ post('/comments/add/:id') do
     redirect('/posts')
 end
 
-post('/comments/delete/:id') do
+post('/comments/:id/delete') do
     delete_comment(params["id"])
     redirect('/posts')
 end
