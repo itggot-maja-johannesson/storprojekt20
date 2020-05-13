@@ -38,11 +38,17 @@ def login_account(username, password)
     user_id = result.first["id"]
     password_digest = result.first["password"]
 
-    if BCrypt::Password.new(password_digest) == password
-        return user_id
-    else
-        return "Invalid Credentials!"
+    tries = 0
+
+    while tries < 8
+        if BCrypt::Password.new(password_digest) == password
+            return user_id
+        else
+            return "Invalid Credentials!"
+            tries += 1
+        end
     end
+    return "You've tried too many times"
 end
 
 def view_posts()
@@ -102,7 +108,7 @@ def delete_post(id)
     @db.execute("DELETE FROM posts WHERE id=?", [id])
 end
 
-def show_edit_post(user_id)
+def show_edit_post(user_id, params)
     @post = @db.execute("SELECT * FROM posts WHERE id=?",[params["id"]])[0]
     @post["categories"] = @db.execute("SELECT * FROM posts_categories WHERE post_id=?",[params["id"]])
     
