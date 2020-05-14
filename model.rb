@@ -38,17 +38,23 @@ def login_account(username, password)
     user_id = result.first["id"]
     password_digest = result.first["password"]
 
-    tries = 0
+    timed_tries = []
+    time = 0
 
-    while tries < 8
-        if BCrypt::Password.new(password_digest) == password
-            return user_id
-        else
-            return "Invalid Credentials!"
-            tries += 1
+    if BCrypt::Password.new(password_digest) == password
+        return user_id
+    else
+        return "Invalid Credentials!"
+        timed_tries << Time.now.to_i 
+        if timed_tries.length > 5
+            if Time.now.to_i - timed_tries[0] < 10
+                time = Time.now.to_i
+                timed_tries = []
+                return "You've tried too many passwords in too short time, try again in 5 minutes"
+            end
+            timed_tries.shift
         end
     end
-    return "You've tried too many times"
 end
 
 def view_posts()
@@ -104,7 +110,7 @@ def upload_post(params, user_id)
     return true
 end
 
-def delete_post(id)
+def delete_post(id, user_id)
     @db.execute("DELETE FROM posts WHERE id=?", [id])
 end
 
