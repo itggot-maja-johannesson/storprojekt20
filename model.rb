@@ -3,8 +3,10 @@ require 'sqlite3'
 require 'bcrypt'
 
 module Model
+
     # Connects to database
     #
+    # @return [SQLite3::Database]
     def connect_to_database(path)
         db = SQLite3::Database.new(path)
         db.results_as_hash = true
@@ -40,13 +42,12 @@ module Model
 
     # Attempts to login 
     #
-    # @param [Hash] params form data
-    # @option params [String] username The username
-    # @option params [String] password The password
+    # @param [String] username The username
+    # @param [String] password The password
     # 
-    # @return [Array] The username does not exist
-    # @return [Integer] The id of the user
-    # @return [Array] if credentials do not match a user
+    # @return [Array] if the username does not exist
+    # @return [Integer] if the login is successful
+    # @return [Array] if credentials does not match a user
     def login_account(username, password)
 
         result = @db.execute("SELECT * FROM users WHERE username=?", username)
@@ -161,7 +162,7 @@ module Model
         return true
     end
 
-    # Deletes post 
+    # Deletes post
     # 
     # @param [Integer] id The id of the post
     # @param [Integer] user_id The id of the user
@@ -173,8 +174,9 @@ module Model
 
     # Get post with a specific id
     #
-    # @param [Integer] user_id The is of the user
+    # @param [Integer] user_id The id of the user
     # @param [Hash] params form data
+    # @option params [Integer] id The id of the post
     #
     # @return [Integer] 
     def show_edit_post(user_id, params)
@@ -188,16 +190,16 @@ module Model
     end
 
     # Edits post
-    # 
+    #
     # @param [Interger] user_id The id of the user
     # @param [Hash] params form data
     # @option params [String] title The title of the post
     # @option params [String] specification The text of the post
-    # @option params [String] cat_1 categorie 1 of the post 
-    # @option params [String] cat_2 categorie 2 of the post 
-    # @option params [String] cat_3 categorie 3 of the post 
-    # @option params [String] cat_4 categorie 4 of the post 
-    # @option params [String] cat_5 categorie 5 of the post 
+    # @option params [String] cat_1 categorie 1 of the post
+    # @option params [String] cat_2 categorie 2 of the post
+    # @option params [String] cat_3 categorie 3 of the post
+    # @option params [String] cat_4 categorie 4 of the post
+    # @option params [String] cat_5 categorie 5 of the post
     # @option params [String] price The price of the post
     # @option params [Sinatra::IndifferentHash] file The picture of the post
     #

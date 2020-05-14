@@ -130,7 +130,7 @@ end
 
 # Deletes post
 #
-# @param [String] id, The id of the post
+# @param [String] :id, The id of the post
 #
 # @see Model#delete_post
 post('/posts/:id/delete') do
@@ -140,7 +140,7 @@ end
 
 # Displays edit post page
 #
-# @param [String] id, The id of the post
+# @param [String] :id, The id of the post
 #
 # @see Model#show_edit_post
 get('/posts/:id/edit') do
@@ -163,7 +163,7 @@ end
 # @param [String] cat_5, categorie 5 of the post 
 # @param [String] price, The price of the post
 # @param [Sinatra::IndifferentHash] file, The picture of the post
-# @param [String] id, The id of the post
+# @param [String] :id, The id of the post
 # 
 # @see Model#edit_post
 post('/posts/:id/edit') do
@@ -180,6 +180,8 @@ end
 
 # Displays your account page
 #
+# @param [String] :id, The id of the user
+#
 get("/users/:id") do
     slim(:'users/show')
 end
@@ -187,7 +189,7 @@ end
 # Comments on post
 #
 # @param [String] comment, The text of the comment
-# @param [String] id, The id of the post
+# @param [String] :id, The id of the post
 #
 # @see Model#post_comment
 post('/comments/:id/add') do 
@@ -199,6 +201,8 @@ post('/comments/:id/add') do
 end
 
 # Deletes comment on post
+#
+# @param [String] :id, The id of the comment
 #
 # @see Model#delete_comment
 post('/comments/:id/delete') do
