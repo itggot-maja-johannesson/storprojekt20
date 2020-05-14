@@ -30,31 +30,32 @@ end
 def login_account(username, password)
 
     result = @db.execute("SELECT * FROM users WHERE username=?", username)
-
+    
     if result.empty?
-        return "No such username!"
+        return ["No such username!", false]
     end
 
     user_id = result.first["id"]
     password_digest = result.first["password"]
 
-    timed_tries = []
-    time = 0
-
     if BCrypt::Password.new(password_digest) == password
         return user_id
     else
-        return "Invalid Credentials!"
-        timed_tries << Time.now.to_i 
-        if timed_tries.length > 5
-            if Time.now.to_i - timed_tries[0] < 10
-                time = Time.now.to_i
-                timed_tries = []
-                return "You've tried too many passwords in too short time, try again in 5 minutes"
-            end
-            timed_tries.shift
-        end
+        return ["Invalid Credentials!", Time.now.to_i]
     end
+end
+
+def timer(time_start, time_frame)
+
+    now = Time.now.to_i
+    time_diff = now - time_start
+
+    if time_diff < time_frame
+        return [false, "Try again in #{time_frame - time_diff} seconds"]
+    else
+        return [true]
+    end
+
 end
 
 def view_posts()
@@ -112,6 +113,8 @@ end
 
 def delete_post(id, user_id)
     @db.execute("DELETE FROM posts WHERE id=?", [id])
+    @db.execute("DELETE FROM posts_categories WHERE post_id=?", [id])
+    @db.execute("DELETE FROM comments WHERE post_id=?", [id])
 end
 
 def show_edit_post(user_id, params)

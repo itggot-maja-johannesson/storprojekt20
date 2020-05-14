@@ -17,7 +17,8 @@ html lang="en"
             div class="navigation"
                 input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for..."
             div class="navigation"
-                a href="/users/#{session[:user_id]}" Your account
+                - if session[:user_id]
+                    a href="/users/#{session[:user_id]}" Your account
 
         div class="body-container"
             header

@@ -22,16 +22,15 @@ post('/register') do
     password = params["password"]
     password_confirmation = params["confirm_password"]
     results = register_account(username, password, password_confirmation)
-    p results
+
     if results == true
         session[:user_error] = ""
-        session[:user_id] = login_account(username, password) 
+        session[:user_id] = login_account(username, password)
         redirect('/posts')
     else
         session[:user_error] = results
         redirect('/register')
     end
-
 end
 
 get('/login') do
@@ -41,13 +40,27 @@ end
 post('/login') do
     username = params["username"]
     password = params["password"]
-
     results = login_account(username, password)
-    if results.is_a? Integer
+
+    if !session[:time_start] && results.is_a?(Integer)
         session[:user_id] = results
         redirect('/posts')
     else
-        session[:user_error] = results
+
+        if !!session[:time_start]
+
+            timer = timer(session[:time_start], 10)
+            session[:time_start] = nil if timer.first
+            session[:user_error] = timer.last if !timer.first
+
+            if !session[:time_start] && results.is_a?(Integer)
+                session[:user_id] = results
+                redirect('/posts')
+            end
+        else
+            session[:time_start] = results.last
+            session[:user_error] = results.first
+        end
         redirect("/login")
     end
 end
@@ -75,12 +88,12 @@ post('/posts') do
 end
 
 post('/posts/:id/delete') do
-    delete_post(params["id"])
+    delete_post(params["id"], session[:user_id])
     redirect('/posts')
 end
 
 get('/posts/:id/edit') do
-    results = show_edit_post(session[:user_id]) 
+    results = show_edit_post(session[:user_id], params) 
     if results == true
         slim(:'posts/edit')
     else
